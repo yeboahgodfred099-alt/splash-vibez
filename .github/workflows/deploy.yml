@@ -1,0 +1,27 @@
+name: Deploy Splash-Vibez to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get latest source code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Hostinger VPS
+        uses: hostinger/deploy-action@v1
+        with:
+          api-key: ${{ secrets.HOSTINGER_API_KEY }}
+          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
+          project-name: splash-vibez
+          environment-variables: |
+            VITE_N8N_COUPON_VALIDATE_URL=${{ secrets.VITE_N8N_COUPON_VALIDATE_URL }}
+            VITE_N8N_REGISTRATION_URL=${{ secrets.VITE_N8N_REGISTRATION_URL }}
+            VITE_N8N_PAYMENT_STATUS_URL=${{ secrets.VITE_N8N_PAYMENT_STATUS_URL }}
+            VITE_N8N_TICKET_URL=${{ secrets.VITE_N8N_TICKET_URL }}
