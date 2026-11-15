@@ -35,7 +35,13 @@ class N8nApiError extends Error {
  * Validates whether an endpoint URL is configured and not a placeholder.
  */
 function getEndpointUrl(envKey: keyof ImportMetaEnv, fallbackName: string): string {
-  const url = import.meta.env[envKey];
+  // Check runtime environment variables (injected via Docker env-config.js) first,
+  // falling back to Vite build-time import.meta.env
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const windowEnv = typeof window !== 'undefined' ? (window as any).__ENV__ : undefined;
+  const rawUrl = windowEnv?.[envKey] || import.meta.env[envKey];
+  const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+
   if (!url || url.includes('REPLACE-') || url.includes('YOUR-N8N-HOST')) {
     throw new N8nApiError(
       `${fallbackName} endpoint is not configured. Please supply a valid deployed n8n webhook URL.`,

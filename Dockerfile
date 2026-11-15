@@ -38,7 +38,12 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy compiled static assets from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Copy and set up the runtime environment injection script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
 
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
 
