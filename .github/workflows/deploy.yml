@@ -25,3 +25,4 @@ jobs:
             VITE_N8N_REGISTRATION_URL=${{ secrets.VITE_N8N_REGISTRATION_URL }}
             VITE_N8N_PAYMENT_STATUS_URL=${{ secrets.VITE_N8N_PAYMENT_STATUS_URL }}
             VITE_N8N_TICKET_URL=${{ secrets.VITE_N8N_TICKET_URL }}
+
