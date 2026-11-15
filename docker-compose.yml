@@ -1,0 +1,33 @@
+services:
+  splash-vibez:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_N8N_COUPON_VALIDATE_URL: ${VITE_N8N_COUPON_VALIDATE_URL}
+        VITE_N8N_REGISTRATION_URL: ${VITE_N8N_REGISTRATION_URL}
+        VITE_N8N_PAYMENT_STATUS_URL: ${VITE_N8N_PAYMENT_STATUS_URL}
+        VITE_N8N_TICKET_URL: ${VITE_N8N_TICKET_URL}
+    container_name: splash-vibez-app
+    restart: unless-stopped
+    expose:
+      - "80"
+    ports:
+      - "3000:80"
+    labels:
+      # Enable Traefik for this container
+      - "traefik.enable=true"
+      # Match requests for your subdomain
+      - "traefik.http.routers.splashvibez.rule=Host(`event.clevawave.com`)"
+      - "traefik.http.routers.splashvibez.entrypoints=websecure"
+      - "traefik.http.routers.splashvibez.tls=true"
+      - "traefik.http.routers.splashvibez.tls.certresolver=letsencrypt"
+      # Direct traffic to Nginx on port 80
+      - "traefik.http.services.splashvibez.loadbalancer.server.port=80"
+
+# Note: If your Hostinger Traefik runs on a shared external network, 
+# you can attach it by uncommenting the network lines below:
+# networks:
+#   default:
+#   traefik-net:
+#     external: true
