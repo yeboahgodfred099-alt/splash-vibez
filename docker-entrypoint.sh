@@ -13,3 +13,4 @@ EOF
 
 # Execute the default container command (nginx)
 exec "$@"
+
