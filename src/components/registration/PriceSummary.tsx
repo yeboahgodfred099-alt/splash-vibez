@@ -47,9 +47,9 @@ export const PriceSummary: React.FC<PriceSummaryProps> = ({ isValidCoupon, coupo
         </div>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-brand-border/60 flex items-center gap-2 text-[11px] text-brand-subtle">
+      <div className="mt-4 pt-3 border-t border-brand-border/60 flex items-center justify-center gap-1.5 text-xs text-brand-muted">
         <ShieldCheck className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
-        <span>Price calculated and charged authoritatively by Paystack via n8n.</span>
+        <span>Secure checkout powered by Paystack</span>
       </div>
     </div>
   );

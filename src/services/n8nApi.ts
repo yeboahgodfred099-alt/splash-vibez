@@ -236,7 +236,9 @@ export async function registerAndInitializePayment(
   }
 
   const amount = Number(raw.amount) || 12000;
-  const displayAmount = raw.displayAmount || (amount / 100).toFixed(2);
+  const displayAmount = raw.displayAmount && !isNaN(Number(raw.displayAmount))
+    ? Number(raw.displayAmount).toFixed(2)
+    : (amount / 100).toFixed(2);
 
   return {
     success: true,
