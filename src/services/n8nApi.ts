@@ -235,15 +235,8 @@ export async function registerAndInitializePayment(
     );
   }
 
-  // If n8n does not return amount/displayAmount, default to expected price (GH₵100 with coupon, GH₵120 without)
-  const defaultPesewas = payload.couponCode ? 10000 : 12000;
-  const amount = raw?.amount !== undefined && !isNaN(Number(raw.amount))
-    ? Number(raw.amount)
-    : defaultPesewas;
-
-  const displayAmount = raw?.displayAmount && !isNaN(Number(raw.displayAmount))
-    ? Number(raw.displayAmount).toFixed(2)
-    : (raw?.amount ? (Number(raw.amount) / 100).toFixed(2) : (defaultPesewas / 100).toFixed(2));
+  const amount = Number(raw.amount) || 12000;
+  const displayAmount = raw.displayAmount || (amount / 100).toFixed(2);
 
   return {
     success: true,

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Ticket, AlertTriangle, ShieldCheck, X } from 'lucide-react';
+import { ArrowLeft, Ticket, AlertTriangle, ShieldCheck } from 'lucide-react';
 import RegistrationForm from '../components/registration/RegistrationForm';
+import Alert from '../components/common/Alert';
 import Button from '../components/common/Button';
 import { RegistrationFormData } from '../types/form';
 import { EVENT_DETAILS } from '../utils/constants';
@@ -52,17 +53,16 @@ export const Registration: React.FC = () => {
         couponCode: data.couponCode ? data.couponCode.trim() : undefined,
       });
 
-      // Price Consistency Check (Numerical):
+      // Price Consistency Check:
       // Compare the server-calculated amount with what the customer was shown
-      const expectedNum = data.couponCode && data.couponCode.trim()
-        ? Number(EVENT_DETAILS.pricing.couponDisplay)
-        : Number(EVENT_DETAILS.pricing.standardDisplay);
-      const serverNum = Number(response.displayAmount) || (Number(response.amount) / 100);
+      const expectedAmount = data.couponCode.trim()
+        ? EVENT_DETAILS.pricing.couponDisplay
+        : EVENT_DETAILS.pricing.standardDisplay;
 
-      if (serverNum && Math.abs(serverNum - expectedNum) > 0.01) {
-        // Price discrepancy detected: Show confirmation pop-up modal
+      if (response.displayAmount && response.displayAmount !== expectedAmount) {
+        // Price discrepancy detected: DO NOT redirect automatically!
         setPriceDiscrepancy({
-          serverAmount: serverNum.toFixed(2),
+          serverAmount: response.displayAmount,
           authorizationUrl: response.authorizationUrl,
         });
         return;
@@ -111,6 +111,49 @@ export const Registration: React.FC = () => {
           </div>
         </div>
 
+        {/* Price discrepancy guard alert */}
+        {priceDiscrepancy && (
+          <div className="mb-6">
+            <Alert
+              type="warning"
+              title="Price Update Required"
+              action={
+                <div className="flex items-center gap-3 mt-2">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={handleConfirmDiscrepancy}
+                  >
+                    Confirm & Proceed ({EVENT_DETAILS.pricing.currencySymbol}
+                    {priceDiscrepancy.serverAmount})
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setPriceDiscrepancy(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              }
+            >
+              <div className="flex items-start gap-2 text-xs sm:text-sm">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <span>
+                  The authoritative amount calculated by the server is{' '}
+                  <strong className="text-white">
+                    {EVENT_DETAILS.pricing.currencySymbol}
+                    {priceDiscrepancy.serverAmount}
+                  </strong>
+                  . Please confirm if you wish to proceed with this updated total.
+                </span>
+              </div>
+            </Alert>
+          </div>
+        )}
+
         <RegistrationForm
           onSubmit={handleSubmit}
           onValidateCoupon={handleValidateCoupon}
@@ -119,65 +162,10 @@ export const Registration: React.FC = () => {
         />
       </div>
 
-      <div className="mt-6 text-center text-xs text-brand-muted flex items-center justify-center gap-1.5">
+      <div className="mt-6 text-center text-xs text-brand-subtle flex items-center justify-center gap-1.5">
         <ShieldCheck className="w-3.5 h-3.5 text-brand-cyan" />
-        <span>Secure checkout powered by Paystack</span>
+        <span>Authoritative pricing and transaction tokens are verified server-side.</span>
       </div>
-
-      {/* Price Update Pop-up Modal */}
-      {priceDiscrepancy && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="price-update-title"
-        >
-          <div className="relative w-full max-w-md bg-brand-card border border-brand-border rounded-3xl p-6 sm:p-8 shadow-2xl text-center">
-            <button
-              type="button"
-              onClick={() => setPriceDiscrepancy(null)}
-              className="absolute top-4 right-4 p-2 text-brand-muted hover:text-white rounded-full hover:bg-brand-surface transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <AlertTriangle className="w-7 h-7" />
-            </div>
-
-            <h3 id="price-update-title" className="text-xl font-bold text-white mb-2">
-              Price Confirmation
-            </h3>
-            <p className="text-sm text-brand-muted mb-6 leading-relaxed">
-              The total amount calculated for this checkout is{' '}
-              <strong className="text-brand-cyan font-bold text-base">
-                {EVENT_DETAILS.pricing.currencySymbol}{priceDiscrepancy.serverAmount}
-              </strong>
-              . Would you like to proceed with this updated total?
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <Button
-                type="button"
-                variant="primary"
-                className="w-full"
-                onClick={handleConfirmDiscrepancy}
-              >
-                Proceed to Payment
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => setPriceDiscrepancy(null)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
